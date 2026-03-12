@@ -4,72 +4,555 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDFPilot — Professional PDF Editor for iPhone & iPad</title>
+    <meta name="description" content="Professional PDF editing, annotation, and AI-powered analysis — entirely on your device. No cloud uploads. No data collection.">
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+    <link rel="canonical" href="https://pdfpilotapp.com">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/logo/pdfpilot-logo-dark.png">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="PDFPilot — Professional PDF Editor for iPhone & iPad">
+    <meta property="og:description" content="Professional PDF editing, annotation, and AI-powered analysis — entirely on your device.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pdfpilotapp.com">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            background: #0a0a0a;
-            color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif;
+            background: #FFFFFF;
+            color: #1D1D1F;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
-        .container { max-width: 720px; margin: 0 auto; padding: 60px 24px; }
-        h1 {
-            font-size: 2.4rem;
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; display: block; }
+
+        /* ===== Variables (Light — Default) ===== */
+        :root {
+            --brand-red: #FF1F2D;
+            --brand-red-glow: rgba(255, 31, 45, 0.08);
+            --bg: #FFFFFF;
+            --surface: #F5F5F7;
+            --surface-elevated: #FFFFFF;
+            --text-primary: #1D1D1F;
+            --text-secondary: #6E6E73;
+            --text-tertiary: #86868B;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --max-width: 1120px;
+            --nav-height: 56px;
+        }
+
+        /* Logo switching — light default */
+        .nav-brand .logo-light { display: block; }
+        .nav-brand .logo-dark { display: none; }
+
+        /* ===== Dark Mode ===== */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --brand-red-glow: rgba(255, 31, 45, 0.15);
+                --bg: #0A0A0A;
+                --surface: #141416;
+                --surface-elevated: #1C1C1E;
+                --text-primary: #F5F5F7;
+                --text-secondary: #86868B;
+                --text-tertiary: #6E6E73;
+                --border: rgba(255, 255, 255, 0.06);
+                --border-subtle: rgba(255, 255, 255, 0.06);
+                --nav-bg: rgba(44, 44, 46, 0.92);
+            }
+            body {
+                background: #0A0A0A;
+                color: #F5F5F7;
+            }
+            /* Show dark logo, hide light logo */
+            .nav-brand .logo-light { display: none; }
+            .nav-brand .logo-dark {
+                display: block;
+                filter: brightness(1.3) drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+            }
+            .nav-brand img { height: 40px; }
+            /* Feature card hover */
+            .feature-card:hover {
+                border-color: rgba(255, 255, 255, 0.12);
+            }
+            /* Privacy section — use gradient instead of solid bg */
+            .privacy-section {
+                background: transparent;
+            }
+            .privacy-section::before {
+                background: linear-gradient(180deg, transparent 0%, rgba(255, 59, 48, 0.03) 50%, transparent 100%);
+            }
+            /* Hero badge tweak */
+            .hero-badge {
+                background: rgba(255, 59, 48, 0.08);
+                border-color: rgba(255, 59, 48, 0.2);
+            }
+        }
+
+        /* ===== Nav ===== */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: var(--nav-bg);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+        }
+        .nav-brand img {
+            height: 36px;
+            width: auto;
+        }
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+        }
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+
+        /* ===== Hero ===== */
+        .hero {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 160px 24px 100px;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--brand-red-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            margin-bottom: 28px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--brand-red);
+            background: rgba(255, 31, 45, 0.06);
+            border: 1px solid rgba(255, 31, 45, 0.15);
+            border-radius: 100px;
+            letter-spacing: 0.02em;
+        }
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4rem);
             font-weight: 700;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            max-width: 700px;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        .app-store-badge {
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+        .app-store-badge:hover { opacity: 0.85; }
+        .app-store-badge img { height: 56px; width: auto; }
+        .cta .app-store-badge img { height: 64px; }
+
+        /* ===== Section Common ===== */
+        .section {
+            padding: 100px 24px;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--brand-red);
             margin-bottom: 12px;
         }
-        .brand { color: #e63946; }
-        .tagline {
-            font-size: 1.1rem;
-            color: #999;
-            margin-bottom: 48px;
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            line-height: 1.15;
+            margin-bottom: 16px;
         }
-        .links {
+        .section-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 520px;
+            line-height: 1.5;
+        }
+
+        /* ===== Features Grid ===== */
+        .features { text-align: center; }
+        .features .section-subtitle { margin: 0 auto 60px; }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: left;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
-            gap: 24px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+        .feature-icon--ai { background: linear-gradient(135deg, #5E5CE6, #BF5AF2); }
+        .feature-icon--annotate { background: linear-gradient(135deg, #FF9500, #FF3B30); }
+        .feature-icon--security { background: linear-gradient(135deg, #30D158, #34C759); }
+        .feature-icon--edit { background: linear-gradient(135deg, #0A84FF, #5AC8FA); }
+        .feature-icon--ocr { background: linear-gradient(135deg, #FF6482, #FF2D55); }
+        .feature-icon--batch { background: linear-gradient(135deg, #FFD60A, #FF9F0A); }
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ===== Privacy Section ===== */
+        .privacy-section {
+            position: relative;
+            padding: 100px 24px;
+            text-align: center;
+            overflow: hidden;
+            background: var(--surface);
+        }
+        .privacy-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: none;
+            pointer-events: none;
+        }
+        .privacy-content {
+            position: relative;
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+        .privacy-content .section-subtitle {
+            margin: 0 auto 52px;
+        }
+        .privacy-points {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
             flex-wrap: wrap;
         }
-        .links a {
-            color: #e63946;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 12px 24px;
-            border: 1px solid #e6394640;
-            border-radius: 12px;
-            transition: all 0.2s;
+        .privacy-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            max-width: 300px;
+            text-align: left;
         }
-        .links a:hover {
-            background: #e6394615;
-            border-color: #e63946;
+        .privacy-check {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(48, 209, 88, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
         }
+        .privacy-check svg {
+            width: 14px;
+            height: 14px;
+        }
+        .privacy-point p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .privacy-point strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== CTA / Download ===== */
+        .cta {
+            text-align: center;
+            padding: 80px 24px 60px;
+        }
+        .cta .section-title { margin-bottom: 8px; }
+        .cta .section-subtitle {
+            margin: 0 auto 36px;
+        }
+        .cta-fine-print {
+            margin-top: 16px;
+            font-size: 0.78rem;
+            color: var(--text-tertiary);
+        }
+
+        /* ===== Footer ===== */
         .footer {
-            margin-top: 80px;
-            color: #666;
-            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            padding: 32px 24px;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        .footer a { color: #999; text-decoration: none; }
-        .footer a:hover { color: #e63946; }
+        .footer-left {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+        .footer-links a {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--text-primary); }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 640px) {
+            .nav-links { gap: 18px; }
+            .nav-links a { font-size: 0.8rem; }
+            .hero { padding: 130px 20px 70px; }
+            .section { padding: 70px 20px; }
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .feature-card { padding: 28px 22px; }
+            .privacy-section { padding: 70px 20px; }
+            .privacy-points {
+                flex-direction: column;
+                align-items: center;
+                gap: 28px;
+            }
+            .privacy-point { max-width: 100%; }
+            .cta { padding: 60px 20px 40px; }
+            .footer {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><span class="brand">PDFPilot</span></h1>
-        <p class="tagline">Professional PDF editing, annotation, and AI-powered analysis — entirely on your device.</p>
 
-        <div class="links">
-            <a href="/terms">Terms of Service</a>
-            <a href="/privacy">Privacy Policy</a>
-            <a href="mailto:support@pdfpilotapp.com">Contact Support</a>
+<!-- ===== Navigation ===== -->
+<nav class="nav">
+    <a href="#top" class="nav-brand" aria-label="PDFPilot">
+        <img src="/logo/pdfpilot-logo.png" alt="PDFPilot" height="28" class="logo-light">
+        <img src="/logo/pdfpilot-logo-dark.png" alt="PDFPilot" height="28" class="logo-dark">
+    </a>
+    <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#download">Download</a></li>
+    </ul>
+</nav>
+
+<main>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="top">
+    <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        On-Device AI Powered
+    </div>
+    <h1>The PDF Editor That Respects Your Privacy</h1>
+    <p>Professional editing, annotation, and AI-powered analysis — entirely on your device. No cloud uploads. No data collection.</p>
+
+    <!-- App Store Badge -->
+    <a href="https://apps.apple.com/app/pdfpilot" class="app-store-badge" aria-label="Download on the App Store">
+        <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1" alt="Download on the App Store">
+    </a>
+</section>
+
+<!-- ===== Features ===== -->
+<section class="section features" id="features">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Everything you need in a PDF editor.</h2>
+    <p class="section-subtitle">Powerful tools for professionals, designed with simplicity in mind.</p>
+
+    <div class="features-grid">
+        <!-- AI -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--ai">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            </div>
+            <h3>On-Device AI</h3>
+            <p>Summarize, extract data, translate, and chat with your PDFs. Powered by Apple Intelligence — nothing leaves your device.</p>
         </div>
 
-        <div class="footer">
-            <p>&copy; 2026 PDFPilot. All rights reserved.</p>
-            <p style="margin-top: 8px;">
-                <a href="mailto:support@pdfpilotapp.com">support@pdfpilotapp.com</a>
-            </p>
+        <!-- Annotations -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--annotate">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            </div>
+            <h3>Full Annotation Suite</h3>
+            <p>Highlight, draw, add text, shapes, stamps, signatures, and sticky notes. Mark up any document with precision.</p>
+        </div>
+
+        <!-- Security -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--security">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <h3>Privacy First</h3>
+            <p>Face ID lock, screen capture protection, and metadata sanitization. Your sensitive documents stay completely private.</p>
+        </div>
+
+        <!-- Editing -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--edit">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <h3>Powerful Editing</h3>
+            <p>Merge, split, compress, crop, watermark, and flatten PDFs. Search and replace text across entire documents.</p>
+        </div>
+
+        <!-- OCR -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--ocr">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h4"/><path d="M7 12h6"/><path d="M7 16h2"/><circle cx="17" cy="16" r="2"/><path d="M15 14l4 4"/></svg>
+            </div>
+            <h3>Text Recognition</h3>
+            <p>Extract text from scanned documents with built-in OCR. Make any PDF searchable and copyable instantly.</p>
+        </div>
+
+        <!-- Batch -->
+        <div class="feature-card">
+            <div class="feature-icon feature-icon--batch">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="16" height="14" rx="2"/><path d="M6 3h16a2 2 0 0 1 2 2v12"/><path d="M6 3v4"/><path d="M22 7H6"/></svg>
+            </div>
+            <h3>Batch Operations</h3>
+            <p>Process multiple PDFs at once. Merge, compress, watermark, or convert entire folders in seconds.</p>
         </div>
     </div>
+</section>
+
+<!-- ===== Privacy Section ===== -->
+<section class="privacy-section" id="privacy">
+    <div class="privacy-content">
+        <p class="section-label">Privacy</p>
+        <h2 class="section-title">Your PDFs. Your device. Period.</h2>
+        <p class="section-subtitle">PDFPilot was built from the ground up with privacy as a core principle, not an afterthought.</p>
+
+        <div class="privacy-points">
+            <div class="privacy-point">
+                <div class="privacy-check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <p><strong>On-device AI processing.</strong> All AI features run locally using Apple Intelligence. Your documents are never uploaded to any server.</p>
+            </div>
+            <div class="privacy-point">
+                <div class="privacy-check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <p><strong>Zero data collection.</strong> No analytics SDKs, no tracking, no telemetry. We literally cannot see your documents.</p>
+            </div>
+            <div class="privacy-point">
+                <div class="privacy-check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#30D158" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <p><strong>Face ID & screen capture guard.</strong> Lock sensitive documents behind biometrics and block screenshots of protected files.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta" id="download">
+    <p class="section-label">Get Started</p>
+    <h2 class="section-title">Ready to take control of your PDFs?</h2>
+    <p class="section-subtitle">Available on iPhone and iPad.</p>
+
+    <a href="https://apps.apple.com/app/pdfpilot" class="app-store-badge" aria-label="Download on the App Store">
+        <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&releaseDate=1" alt="Download on the App Store">
+    </a>
+    <p class="cta-fine-print">Requires iOS 26 or later.</p>
+</section>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+    <div class="footer-left">&copy; 2026 PDFPilot. All rights reserved.</div>
+    <ul class="footer-links">
+        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="mailto:support@pdfpilotapp.com">Contact Support</a></li>
+    </ul>
+</footer>
+
 </body>
 </html>
