@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <!-- Document shape matching brand rx="24" scaled down -->
+    <rect width="64" height="64" rx="14" fill="#FF1F2D"/>
+    <!-- Folded Corner -->
+    <path d="M42 0 L64 22 L42 22 Z" fill="#E6E6E6"/>
+</svg>
